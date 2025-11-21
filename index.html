@@ -1,118 +1,221 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Auction Random Number Picker</title>
+  <meta charset="UTF-8" />
+  <title>121 Members Auction</title>
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f8f9fa;
-      color: #222;
-      text-align: center;
-      padding: 30px;
+      background: #fff;
+      color: #000;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 550px;
+      padding: 20px;
+      border: 2px solid #000;
+      border-radius: 10px;
     }
 
     h1 {
-      font-size: 2em;
-      margin-bottom: 10px;
+      text-align: center;
+      margin-bottom: 5px;
+      font-size: 1.8rem;
+      color: #000;
     }
 
-    #remaining {
-      font-size: 2em;
-      margin: 10px 0 20px;
+    .subtitle {
+      text-align: center;
       color: #555;
+      margin-bottom: 18px;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(15, 1fr);
-      gap: 8px;
-      max-width: 1200px;
-      margin: 0 auto 30px;
+    .display-box {
+      text-align: center;
+      padding: 25px;
+      border: 2px solid #000;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      background: #f5f5f5;
     }
 
-    .number {
-      background: #ffffff;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      padding: 10px 0;
+    .label {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .current-number {
+      font-size: 4rem;
       font-weight: bold;
-      transition: all 0.3s ease;
+      color: #000;
+      min-height: 4rem;
     }
 
-    .number.sold {
-      background: #dc3545;
-      color: #fff;
-      border-color: #b02a37;
-      text-decoration: line-through;
+    .counter {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1rem;
+      color: #333;
+    }
+
+    .buttons {
+      text-align: center;
+      margin-bottom: 12px;
     }
 
     button {
-      padding: 12px 24px;
-      font-size: 1.1em;
-      border: none;
-      background: #007bff;
-      color: white;
-      border-radius: 8px;
+      padding: 12px 25px;
+      font-size: 1rem;
       cursor: pointer;
-      transition: 0.3s;
+      border: 2px solid #000;
+      background: #fff;
+      color: #000;
+      border-radius: 8px;
+      font-weight: bold;
     }
 
-    button:hover {
-      background: #0056b3;
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
-    #last-picked {
-      font-size: 3em;
-      margin-top: 20px;
-      color: #28a745;
+    .status {
+      text-align: center;
+      min-height: 20px;
+      margin-bottom: 15px;
+      font-size: 0.95rem;
+      color: #333;
     }
+
+    .history-title {
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      color: #444;
+      text-align: center;
+    }
+
+    .history {
+      border: 2px solid #000;
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 160px;
+      overflow-y: auto;
+      background: #fafafa;
+      font-size: 0.9rem;
+    }
+
+    .history span {
+      margin: 3px 5px;
+      padding: 4px 8px;
+      border: 1px solid #000;
+      border-radius: 6px;
+      display: inline-block;
+      font-size: 0.85rem;
+      background: #fff;
+    }
+
+    /* Scrollbar in pure black & white */
+    .history::-webkit-scrollbar { width: 6px; }
+    .history::-webkit-scrollbar-thumb { background: #000; }
+    .history::-webkit-scrollbar-track { background: #ccc; }
+
   </style>
 </head>
 <body>
-  <h1>CRICKET AUCTION</h1>
-  <div id="remaining">Remaining Numbers: 162</div>
-  <div class="grid" id="grid"></div>
-  <button onclick="pickRandom()">Pick Random Number</button>
-  <div id="last-picked"></div>
+
+  <div class="container">
+    <h1>121 Members Auction</h1>
+    <p class="subtitle">Random unique numbers (1 to 121)</p>
+
+    <div class="display-box">
+      <div class="label">Current Number</div>
+      <div id="currentNumber" class="current-number">--</div>
+    </div>
+
+    <div class="counter">
+      Used: <span id="usedCount">0</span> / 121
+    </div>
+
+    <div class="buttons">
+      <button id="nextButton">Generate Next Number</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="history-title">Numbers Used</div>
+    <div id="history" class="history"></div>
+  </div>
 
   <script>
-    const grid = document.getElementById('grid');
-    const remainingText = document.getElementById('remaining');
-    const lastPicked = document.getElementById('last-picked');
+    let numbers = [];
+    let index = 0;
 
-    const totalNumbers = 162;
-    let numbers = Array.from({ length: totalNumbers }, (_, i) => i + 1);
-    let soldNumbers = [];
+    function initNumbers() {
+      numbers = [];
+      for (let i = 1; i <= 121; i++) {
+        numbers.push(i);
+      }
 
-    // Create grid
-    numbers.forEach(num => {
-      const div = document.createElement('div');
-      div.className = 'number';
-      div.id = `num-${num}`;
-      div.textContent = num;
-      grid.appendChild(div);
-    });
+      // shuffle numbers
+      for (let i = numbers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+      }
+      index = 0;
+    }
 
-    function pickRandom() {
-      const available = numbers.filter(n => !soldNumbers.includes(n));
-      if (available.length === 0) {
-        alert("All numbers are sold!");
+    function updateHistory() {
+      const hist = document.getElementById("history");
+      hist.innerHTML = "";
+      for (let i = 0; i < index; i++) {
+        const chip = document.createElement("span");
+        chip.textContent = numbers[i];
+        hist.appendChild(chip);
+      }
+      document.getElementById("usedCount").textContent = index;
+    }
+
+    function nextNumber() {
+      const current = document.getElementById("currentNumber");
+      const nextBtn = document.getElementById("nextButton");
+
+      if (index >= numbers.length) {
+        document.getElementById("status").textContent = "All numbers are done.";
+        nextBtn.disabled = true;
         return;
       }
 
-      const randomIndex = Math.floor(Math.random() * available.length);
-      const selected = available[randomIndex];
+      const num = numbers[index];
+      index++;
 
-      // Mark as sold
-      soldNumbers.push(selected);
-      document.getElementById(`num-${selected}`).classList.add('sold');
-
-      // Update UI
-      remainingText.textContent = `Remaining Numbers: ${totalNumbers - soldNumbers.length}`;
-      lastPicked.textContent = `Last Picked: ${selected}`;
+      current.textContent = num;
+      updateHistory();
+      document.getElementById("status").textContent = "";
+      
+      if (index === numbers.length) {
+        nextBtn.disabled = true;
+        document.getElementById("status").textContent = "All 121 numbers generated.";
+      }
     }
+
+    document.getElementById("nextButton").addEventListener("click", nextNumber);
+
+    initNumbers();
+    updateHistory();
   </script>
 </body>
 </html>
