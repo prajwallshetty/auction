@@ -139,7 +139,7 @@
 
   <div class="container">
     <h1>Volleyball Auction</h1>
-    <p class="subtitle">Random unique numbers (1 to 121)</p>
+    <p class="subtitle">Random unique numbers (1 to 123)</p>
 
     <div class="display-box">
       <div class="label">Current Number</div>
@@ -147,7 +147,7 @@
     </div>
 
     <div class="counter">
-      Used: <span id="usedCount">0</span> / 121
+      Used: <span id="usedCount">0</span> / 123
     </div>
 
     <div class="buttons">
@@ -166,7 +166,7 @@
 
     function initNumbers() {
       numbers = [];
-      for (let i = 1; i <= 121; i++) {
+      for (let i = 1; i <= 123; i++) {
         numbers.push(i);
       }
 
@@ -208,7 +208,7 @@
       
       if (index === numbers.length) {
         nextBtn.disabled = true;
-        document.getElementById("status").textContent = "All 121 numbers generated.";
+        document.getElementById("status").textContent = "All 123 numbers generated.";
       }
     }
 
